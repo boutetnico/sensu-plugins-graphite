@@ -26,6 +26,7 @@ class Resolve < Sensu::Handler
     port = settings[json_config]['port'] ? settings[json_config]['port'].to_s : '2003'
     graphite = Graphite.new(host: settings[json_config]['host'], port: port)
     return unless graphite
+
     prop = @event['check']['status']
     message = "#{settings[json_config]['prefix']}.#{@event['client']['name'].tr('.', '_')}.#{@event['check']['name']}"
     message += " #{prop} #{graphite.time_now + rand(100)}"

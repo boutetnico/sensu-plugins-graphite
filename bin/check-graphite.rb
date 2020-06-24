@@ -176,7 +176,7 @@ class Graphite < Sensu::Plugin::Check::CLI
     values = config_param.split(',')
     i = 0
     levels = {}
-    %w(warning error fatal).each do |type|
+    %w[warning error fatal].each do |type|
       levels[type] = values[i] if values[i]
       i += 1
     end
@@ -186,6 +186,7 @@ class Graphite < Sensu::Plugin::Check::CLI
   def get_graphite_values(target)
     cache_value = graphite_cache target
     return cache_value if cache_value
+
     params = {
       target: target,
       from: "-#{@period}",
@@ -229,7 +230,7 @@ class Graphite < Sensu::Plugin::Check::CLI
 
   def get_max_value(values)
     if values
-      values.map { |i| i[0] ? i[0] : 0 }[0..-2].max
+      values.map { |i| i[0] || 0 }[0..-2].max
     end
   end
 
@@ -253,6 +254,7 @@ class Graphite < Sensu::Plugin::Check::CLI
       while count > 0
         values_size -= 1
         break if values[values_size].nil?
+
         count -= 1 if values[values_size][0]
         ret.push(values[values_size]) if values[values_size][0]
       end
@@ -265,7 +267,7 @@ class Graphite < Sensu::Plugin::Check::CLI
     last_values = {}
     if last_metrics
       last_metrics.each do |target_name, metrics|
-        last_values[target_name] = metrics.map { |metric|  metric[0] }.mean
+        last_values[target_name] = metrics.map { |metric| metric[0] }.mean
       end
     end
     last_values
@@ -276,7 +278,7 @@ class Graphite < Sensu::Plugin::Check::CLI
     warnings = []
     if last_time_stamp
       last_time_stamp.each do |target_name, value|
-        last_time_stamp_bool = value[1] > time.to_i ? true : false
+        last_time_stamp_bool = value[1] > time.to_i
         warnings << "The metric #{target_name} has not been updated in #{updated_since} seconds" unless last_time_stamp_bool
       end
     end
@@ -320,20 +322,22 @@ class Graphite < Sensu::Plugin::Check::CLI
     values = get_graphite_values target
     last_values = last_graphite_value(target, data_points)
     return [[], [], []] unless values
+
     warnings = []
     criticals = []
     fatal = []
-    values.each do |data|
+    values.each do |data| # rubocop:disable Metrics/BlockLength
       target = data[:target]
       values_pair = data[:datapoints]
       values_array = values_pair.select(&:first).map { |v| v.first unless v.first.nil? }
       # #YELLOW
-      avg_value = values_array.reduce { |sum, el| sum + el if el }.to_f / values_array.size # rubocop:disable SingleLineBlockParams
+      avg_value = values_array.reduce { |sum, el| sum + el if el }.to_f / values_array.size
       last_value = last_values[target]
       percent = last_value / avg_value unless last_value.nil? || avg_value.nil?
       # #YELLOW
-      %w(fatal error warning).each do |type|
+      %w[fatal error warning].each do |type|
         next unless max_values.key?(type)
+
         max_value = max_values[type]
         var1 = config[:greater_than] ? percent : max_value.to_f
         var2 = config[:greater_than] ? max_value.to_f : percent
@@ -359,6 +363,7 @@ class Graphite < Sensu::Plugin::Check::CLI
   def check_average(target, max_values)
     values = get_graphite_values target
     return [[], [], []] unless values
+
     warnings = []
     criticals = []
     fatal = []
@@ -367,10 +372,11 @@ class Graphite < Sensu::Plugin::Check::CLI
       values_pair = data[:datapoints]
       values_array = values_pair.select(&:first).map { |v| v.first unless v.first.nil? }
       # #YELLOW
-      avg_value = values_array.reduce { |sum, el| sum + el if el }.to_f / values_array.size # rubocop:disable SingleLineBlockParams
+      avg_value = values_array.reduce { |sum, el| sum + el if el }.to_f / values_array.size
       # YELLOW
-      %w(fatal error warning).each do |type|
+      %w[fatal error warning].each do |type|
         next unless max_values.key?(type)
+
         max_value = max_values[type]
         var1 = config[:greater_than] ? avg_value : max_value.to_f
         var2 = config[:greater_than] ? max_value.to_f : avg_value
@@ -397,10 +403,11 @@ class Graphite < Sensu::Plugin::Check::CLI
     values = get_graphite_values target
     last_values = last_graphite_value(target, data_points)
     return [[], [], []] unless values
+
     warnings = []
     criticals = []
     fatal = []
-    values.each do |data|
+    values.each do |data| # rubocop:disable Metrics/BlockLength
       target = data[:target]
       values_pair = data[:datapoints]
       values_array = values_pair.select(&:first).map { |v| v.first unless v.first.nil? }
@@ -408,8 +415,9 @@ class Graphite < Sensu::Plugin::Check::CLI
       last_value = last_values[target]
       percent = last_value / percentile_value unless last_value.nil? || percentile_value.nil?
       # #YELLOW
-      %w(fatal error warning).each do |type|
+      %w[fatal error warning].each do |type|
         next unless max_values.key?(type)
+
         max_value = max_values[type]
         var1 = config[:greater_than] ? percent : max_value.to_f
         var2 = config[:greater_than] ? max_value.to_f : percent
@@ -436,6 +444,7 @@ class Graphite < Sensu::Plugin::Check::CLI
   def check_last(target, max_values)
     last_targets = last_graphite_value target
     return [[], [], []] unless last_targets
+
     warnings = []
     criticals = []
     fatal = []
@@ -443,8 +452,9 @@ class Graphite < Sensu::Plugin::Check::CLI
     last_targets.each do |target_name, last_value|
       unless last_value.nil?
         # #YELLOW
-        %w(fatal error warning).each do |type|
+        %w[fatal error warning].each do |type|
           next unless max_values.key?(type)
+
           max_value = max_values[type]
           var1 = config[:greater_than] ? last_value : max_value.to_f
           var2 = config[:greater_than] ? max_value.to_f : last_value
@@ -468,14 +478,14 @@ class Graphite < Sensu::Plugin::Check::CLI
     [warnings, criticals, fatal]
   end
 
-  def run # rubocop:disable AbcSize
+  def run
     targets = config[:complex_target] ? [config[:target]] : config[:target].split(',')
     @period = config[:period]
     critical_errors = []
     warnings = []
     fatals = []
     # #YELLOW
-    targets.each do |target|
+    targets.each do |target| # rubocop:disable Metrics/BlockLength
       if config[:check_function_increasing]
         inc_warnings, inc_critical, inc_fatal = check_increasing target
         warnings += inc_warnings
