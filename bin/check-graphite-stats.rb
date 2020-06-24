@@ -86,18 +86,18 @@ class CheckGraphiteStat < Sensu::Plugin::Check::CLI
          boolean: true,
          default: false
 
-  def average(a)
+  def average(datapoints)
     total = 0
-    a.to_a.each { |i| total += i.to_f }
+    datapoints.to_a.each { |i| total += i.to_f }
 
-    total / a.length
+    total / datapoints.length
   end
 
   def danger(metric)
     datapoints = metric['datapoints'].map(&:first).compact
 
     # #YELLOW
-    unless datapoints.empty? # rubocop:disable UnlessElse
+    unless datapoints.empty? # rubocop:disable Style/UnlessElse
       avg = average(datapoints)
       if config[:reverse_scale] == false
         if !config[:crit].nil? && avg > config[:crit]
@@ -121,7 +121,7 @@ class CheckGraphiteStat < Sensu::Plugin::Check::CLI
   def run
     body =
       begin
-        uri = URI.parse(URI.encode("http://#{config[:host]}/render?format=json&target=#{config[:target]}&from=#{config[:period]}"))
+        uri = URI.parse(CGI.escape("http://#{config[:host]}/render?format=json&target=#{config[:target]}&from=#{config[:period]}"))
         res = Net::HTTP.get_response(uri)
         res.body
       rescue => e

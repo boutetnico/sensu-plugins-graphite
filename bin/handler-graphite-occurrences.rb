@@ -32,8 +32,8 @@ class GraphiteOccurrences < Sensu::Handler
       end
     rescue Timeout::Error
       puts 'Graphite -- timed out while sending check occurrence'
-    rescue => error
-      puts "Graphite -- failed to send check occurrence: #{error}"
+    rescue => e
+      puts "Graphite -- failed to send check occurrence: #{e}"
     end
   end
 end

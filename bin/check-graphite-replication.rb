@@ -135,7 +135,7 @@ class CheckGraphiteReplication < Sensu::Plugin::Check::CLI
     fail_count = 0
     # on every server, check to see if all our data replicated
     servers.each do |server|
-      messages.each_with_index do |c|
+      messages.each do |c|
         unless check_for_message(server, c['key'], c['value'])
           puts "#{c['relay']} (#{c['ip']}) didn't post to #{server}"
           fail_count += 1

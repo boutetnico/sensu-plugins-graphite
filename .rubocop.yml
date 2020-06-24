@@ -37,3 +37,24 @@ Style/GuardClause:
 
 Style/ZeroLengthPredicate:
   Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Layout/HashAlignment:
+  Enabled: false
+
+Style/NumericPredicate:
+  Enabled: false
+
+Style/RescueStandardError:
+  Enabled: false
+
+Security/Open:
+  Enabled: false
+
+Style/CommentedKeyword:
+  Enabled: false
+
+Style/SafeNavigation:
+  Enabled: false

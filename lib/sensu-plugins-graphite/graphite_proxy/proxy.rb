@@ -21,7 +21,7 @@ module SensuPluginsGraphite
           formatted = Socket.gethostbyname(Socket.gethostname).first.gsub('.', config[:hostname_sub] || '_')
           config[:target].gsub('$', formatted)
         else
-          URI.escape config[:target]
+          CGI.escape config[:target]
         end
       end
 
