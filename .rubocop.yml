@@ -2,7 +2,7 @@
 MethodLength:
   Max: 200
 
-LineLength:
+Layout/LineLength:
   Max: 160
 
 AbcSize:
@@ -57,4 +57,25 @@ Style/CommentedKeyword:
   Enabled: false
 
 Style/SafeNavigation:
+  Enabled: false
+
+Style/GlobalStdStream:
+  Enabled: false
+
+Style/RedundantRegexpEscape:
+  Enabled: false
+
+Style/StringConcatenation:
+  Enabled: false
+
+Style/CaseLikeIf:
+  Enabled: false
+
+Lint/UselessMethodDefinition:
+  Enabled: false
+
+Style/SoleNestedConditional:
+  Enabled: false
+
+Lint/ConstantDefinitionInBlock:
   Enabled: false
