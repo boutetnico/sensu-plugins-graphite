@@ -2,7 +2,7 @@
 MethodLength:
   Max: 200
 
-LineLength:
+Layout/LineLength:
   Max: 160
 
 AbcSize:
